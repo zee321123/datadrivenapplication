@@ -119,7 +119,6 @@ class MovieApp:
             "Explore movies easily with our app. Get details like release dates, ratings, and more.\n\n"
             "Read engaging movie descriptions. View stunning movie posters\n\n"
             "Effortless searching for your favorite films. Discover similar movies with ease.\n\n"
-            
         )
 
         details_label = tk.Label(app_details_frame, textvariable=app_details_text, font=("Helvetica", 12), bg="#ECF0F1", fg="#2C3E50", justify=tk.CENTER)
@@ -214,7 +213,7 @@ class MovieApp:
 
     def show_menu(self):
         # Show the menu
-        self.toggle_button.menu.post(self.toggle_button.winfo_x(), self.toggle_button.winfo_y() + self.toggle_button.winfo_height())  # Adjust the coordinates based on your layout
+        self.toggle_button.menu.post(self.toggle_button.winfo_rootx(), self.toggle_button.winfo_rooty() + self.toggle_button.winfo_height())
 
     def clear_widgets(self):
         # Clear all widgets from the window
