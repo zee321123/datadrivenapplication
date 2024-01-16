@@ -13,9 +13,10 @@ class MovieApp:
 
         self.api_key = "7b7ed2aa5697e629fa150e5afe30f132"
         self.search_base_url = "https://api.themoviedb.org/3/search/movie"
+        self.tv_base_url = "https://api.themoviedb.org/3/discover/tv"
         self.similar_base_url = "https://api.themoviedb.org/3/movie/{}/similar"
-        self.page_number = 1  # Keep track of the current page number
-        self.last_query = ""  # Keep track of the last search query
+        self.page_number = 1
+        self.last_query = ""
 
         # Set background color to a professional dark shade
         self.root.configure(bg="#2C3E50")
@@ -38,7 +39,7 @@ class MovieApp:
 
         # Load and display the image
         home_image = Image.open("home.png")
-        home_image = home_image.resize((800, 700))  # Adjust the size as needed
+        home_image = home_image.resize((800, 700))
         home_photo = ImageTk.PhotoImage(home_image)
 
         home_label = tk.Label(self.root, image=home_photo, bg="#2C3E50")
@@ -57,8 +58,15 @@ class MovieApp:
         search_entry.pack(pady=10)
 
         # Search Button
-        search_button = tk.Button(self.root, text="Search", command=lambda: self.search_movie(search_entry.get()), bg="#3498DB", fg="white", bd=0)
+        search_button = tk.Button(self.root, text="Search", command=lambda: self.search_movie(search_entry.get()), bg="#3498DB", fg="white", bd=0, width=15, height=2, font=("Helvetica", 12))
         search_button.pack(pady=10)
+
+        # Popular Movies Button
+        popular_button = tk.Button(self.root, text="Popular Movies", command=self.fetch_popular_movies, bg="#3498DB", fg="white", bd=0, width=15, height=2, font=("Helvetica", 12))
+        popular_button.pack(pady=10)
+
+        # Place Popular Movies Button at the top right corner
+        popular_button.place(x=self.root.winfo_width() - popular_button.winfo_width() - 150, y=10)
 
         # Frame for Movie Details
         details_frame = tk.Frame(self.root, bg="#ECF0F1", bd=2, relief=tk.SOLID)  # Light background color
@@ -104,8 +112,19 @@ class MovieApp:
         # Clear the existing widgets
         self.clear_widgets()
 
+        # Create a Canvas widget for the background image
+        canvas = tk.Canvas(self.root, width=800, height=750, bg="#2C3E50")
+        canvas.pack()
+
+        # Load and display the background image
+        details_bg_image = Image.open("details.png")
+        details_bg_image = details_bg_image.resize((800, 750))
+        details_bg_photo = ImageTk.PhotoImage(details_bg_image)
+
+        canvas.create_image(0, 0, anchor=tk.NW, image=details_bg_photo)
+
         # Frame for App Details
-        app_details_frame = tk.Frame(self.root, bg="#ECF0F1", bd=2, relief=tk.SOLID)  # Light background color
+        app_details_frame = tk.Frame(canvas, bg="#ECF0F1", bd=2, relief=tk.SOLID)  # Light background color
         app_details_frame.pack(pady=70, padx=100, fill=tk.BOTH, expand=True)
 
         # App Details Title
@@ -122,11 +141,14 @@ class MovieApp:
         )
 
         details_label = tk.Label(app_details_frame, textvariable=app_details_text, font=("Helvetica", 12), bg="#ECF0F1", fg="#2C3E50", justify=tk.CENTER)
-        details_label.pack(expand=True, fill=tk.BOTH, pady=(10, 200))
+        details_label.pack(expand=True, fill=tk.BOTH, pady=(70, 200))
 
         # Back to Menu Button
-        back_button = tk.Button(self.root, text="Back to Menu", command=self.show_menu, bg="#3498DB", fg="white", bd=0)
+        back_button = tk.Button(canvas, text="Back to Menu", command=self.show_welcome_page, bg="#3498DB", fg="white", bd=0)
         back_button.pack(pady=20)
+
+        # Set the canvas as the last child to make it the background
+        self.root.winfo_children()[-1].lower()
 
     def clear_search_text(self, event):
         if self.search_var.get() == "Search movies...":
@@ -140,7 +162,7 @@ class MovieApp:
         params = {
             "api_key": self.api_key,
             "query": query,
-            "page": self.page_number  # Include page number in the request
+            "page": self.page_number
         }
 
         try:
@@ -163,6 +185,33 @@ class MovieApp:
                 messagebox.showinfo("Information", "No results found.")
         except requests.exceptions.RequestException as e:
             messagebox.showerror("Error", f"Error fetching movie data: {e}")
+
+    def fetch_popular_movies(self):
+        params = {
+            "api_key": self.api_key,
+            "page": 1  # You may adjust the page number as needed
+        }
+
+        try:
+            response = requests.get(self.tv_base_url, params=params)
+            response.raise_for_status()
+            movie_data = response.json()
+            if movie_data.get("results"):
+                first_movie = movie_data["results"][0]
+
+                # Display movie details
+                self.display_movie_details(first_movie)
+
+                # Display movie poster
+                self.display_movie_poster(first_movie)
+
+                # Keep track of the last search query (in this case, it's not a search query but a category)
+                self.last_query = "Popular Movies"
+
+            else:
+                messagebox.showinfo("Information", "No results found.")
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("Error", f"Error fetching popular movies data: {e}")
 
     def display_movie_details(self, movie_data):
         title = movie_data.get("title", "N/A")
@@ -217,6 +266,8 @@ class MovieApp:
 
     def clear_widgets(self):
         # Clear all widgets from the window
+        self.last_query = ""  # Clear the last query when clearing widgets
+
         for widget in self.root.winfo_children():
             if widget != self.toggle_button:
                 widget.destroy()
