@@ -8,7 +8,7 @@ class MovieApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Movie API App")
-        self.root.geometry("800x750")
+        self.root.geometry("800x780")
         self.root.resizable(False, False)
 
         self.api_key = "7b7ed2aa5697e629fa150e5afe30f132"
@@ -17,6 +17,7 @@ class MovieApp:
         self.similar_base_url = "https://api.themoviedb.org/3/movie/{}/similar"
         self.page_number = 1
         self.last_query = ""
+        self.genres = self.fetch_movie_genres()  # Fetch movie genres on initialization
 
         # Set background color to a professional dark shade
         self.root.configure(bg="#2C3E50")
@@ -57,8 +58,17 @@ class MovieApp:
         search_entry.bind("<FocusIn>", self.clear_search_text)
         search_entry.pack(pady=10)
 
-        # Search Button
-        search_button = tk.Button(self.root, text="Search", command=lambda: self.search_movie(search_entry.get()), bg="#3498DB", fg="white", bd=0, width=15, height=2, font=("Helvetica", 12))
+        # Genre Dropdown
+        genre_var = tk.StringVar()
+        genre_dropdown = tk.OptionMenu(self.root, genre_var, *self.genres)
+        genre_dropdown.config(bg="#3498DB", fg="white", font=("Helvetica", 12))
+        genre_dropdown["menu"].config(bg="#3498DB", fg="white", font=("Helvetica", 12))
+        genre_dropdown.pack(pady=10)
+
+        genre_dropdown.place(x=self.root.winfo_width() - genre_dropdown.winfo_width() - 230, y=10)
+
+        # Search Button with Genre
+        search_button = tk.Button(self.root, text="Search", command=lambda: self.search_movie(search_entry.get(), genre_var.get()), bg="#3498DB", fg="white", bd=0, width=15, height=2, font=("Helvetica", 12))
         search_button.pack(pady=10)
 
         # Popular Movies Button
@@ -154,7 +164,22 @@ class MovieApp:
         if self.search_var.get() == "Search movies...":
             self.search_var.set("")
 
-    def search_movie(self, query):
+    def fetch_movie_genres(self):
+        genres_url = "https://api.themoviedb.org/3/genre/movie/list"
+        params = {"api_key": self.api_key}
+        try:
+            response = requests.get(genres_url, params=params)
+            response.raise_for_status()
+            genres_data = response.json()
+            if genres_data.get("genres"):
+                return [genre["name"] for genre in genres_data["genres"]]
+            else:
+                return []
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("Error", f"Error fetching movie genres: {e}")
+            return []
+
+    def search_movie(self, query, genre):
         if not query:
             messagebox.showwarning("Warning", "Please enter a search query.")
             return
@@ -162,7 +187,8 @@ class MovieApp:
         params = {
             "api_key": self.api_key,
             "query": query,
-            "page": self.page_number
+            "page": self.page_number,
+            "with_genres": self.get_genre_id(genre)  # Add genre parameter
         }
 
         try:
@@ -252,17 +278,20 @@ class MovieApp:
     def next_page(self):
         # Increment page number and search for similar movies
         self.page_number += 1
-        self.search_movie(self.last_query)
+        self.search_movie(self.last_query, "")
 
     def prev_page(self):
         # Decrement page number and search for similar movies
         if self.page_number > 1:
             self.page_number -= 1
-            self.search_movie(self.last_query)
+            self.search_movie(self.last_query, "")
 
-    def show_menu(self):
-        # Show the menu
-        self.toggle_button.menu.post(self.toggle_button.winfo_rootx(), self.toggle_button.winfo_rooty() + self.toggle_button.winfo_height())
+    def get_genre_id(self, genre_name):
+        # Get the genre ID based on the genre name
+        for genre in self.genres:
+            if genre == genre_name:
+                return genre
+        return None
 
     def clear_widgets(self):
         # Clear all widgets from the window
