@@ -7,7 +7,7 @@ import io
 class MovieApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Movie API App")
+        self.root.title("Movieflix")
         self.root.geometry("800x780")
         self.root.resizable(False, False)
 
@@ -153,8 +153,8 @@ class MovieApp:
         details_label = tk.Label(app_details_frame, textvariable=app_details_text, font=("Helvetica", 12), bg="#ECF0F1", fg="#2C3E50", justify=tk.CENTER)
         details_label.pack(expand=True, fill=tk.BOTH, pady=(70, 200))
 
-        # Back to Menu Button
-        back_button = tk.Button(canvas, text="Back to Menu", command=self.show_welcome_page, bg="#3498DB", fg="white", bd=0)
+        # Back to Home Button
+        back_button = tk.Button(canvas, text="Back to Home", command=self.show_welcome_page, bg="#3498DB", fg="white", bd=0)
         back_button.pack(pady=20)
 
         # Set the canvas as the last child to make it the background
