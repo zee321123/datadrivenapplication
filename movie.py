@@ -19,7 +19,7 @@ class MovieApp:
         self.last_query = ""
         self.genres = self.fetch_movie_genres()  # Fetch movie genres on initialization
 
-        # Set background color to a professional dark shade
+        #background color
         self.root.configure(bg="#2C3E50")
 
         # Menubutton for Toggle
@@ -75,7 +75,7 @@ class MovieApp:
         popular_button = tk.Button(self.root, text="Popular Movies", command=self.fetch_popular_movies, bg="#3498DB", fg="white", bd=0, width=15, height=2, font=("Helvetica", 12))
         popular_button.pack(pady=10)
 
-        # Place Popular Movies Button at the top right corner
+        # Popular Movies Button 
         popular_button.place(x=self.root.winfo_width() - popular_button.winfo_width() - 150, y=10)
 
         # Frame for Movie Details
@@ -122,11 +122,11 @@ class MovieApp:
         # Clear the existing widgets
         self.clear_widgets()
 
-        # Create a Canvas widget for the background image
+        # Canvas widget for the background image
         canvas = tk.Canvas(self.root, width=800, height=750, bg="#2C3E50")
         canvas.pack()
 
-        # Load and display the background image
+        # background image
         details_bg_image = Image.open("details.png")
         details_bg_image = details_bg_image.resize((800, 750))
         details_bg_photo = ImageTk.PhotoImage(details_bg_image)
@@ -215,7 +215,7 @@ class MovieApp:
     def fetch_popular_movies(self):
         params = {
             "api_key": self.api_key,
-            "page": 1  # You may adjust the page number as needed
+            "page": 1  
         }
 
         try:
@@ -231,7 +231,7 @@ class MovieApp:
                 # Display movie poster
                 self.display_movie_poster(first_movie)
 
-                # Keep track of the last search query (in this case, it's not a search query but a category)
+                # Keep track of the last search query 
                 self.last_query = "Popular Movies"
 
             else:
@@ -268,7 +268,7 @@ class MovieApp:
 
             photo_image = ImageTk.PhotoImage(poster_image)
 
-            # Poster Label with Border
+            # Poster Label
             self.poster_label.configure(image=photo_image, compound=tk.TOP)
             self.poster_label.image = photo_image
 
@@ -276,12 +276,12 @@ class MovieApp:
             messagebox.showinfo("Information", "No poster available.")
 
     def next_page(self):
-        # Increment page number and search for similar movies
+        # next page number and search for similar movies
         self.page_number += 1
         self.search_movie(self.last_query, "")
 
     def prev_page(self):
-        # Decrement page number and search for similar movies
+        # previous page number and search for similar movies
         if self.page_number > 1:
             self.page_number -= 1
             self.search_movie(self.last_query, "")
